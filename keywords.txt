@@ -6,7 +6,7 @@
 # Datatypes (KEYWORD1)
 ###########################################
 
-xxtea-iot-crypt.h	KEYWORD1	xxtea-iot-crypt.h
+xxtea	KEYWORD1	xxtea
 
 ###########################################
 # Methods and Functions (KEYWORD2)
@@ -15,6 +15,9 @@ xxtea-iot-crypt.h	KEYWORD1	xxtea-iot-crypt.h
 xxtea_setup		KEYWORD2
 xxtea_encrypt	KEYWORD2
 xxtea_decrypt	KEYWORD2
+setKey	KEYWORD2
+encrypt	KEYWORD2
+decrypt	KEYWORD2
 
 ###########################################
 # Constants (LITERAL1)

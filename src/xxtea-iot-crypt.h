@@ -30,6 +30,8 @@
 
 #include <stdint.h>
 
+#include <Arduino.h>
+
 #define MAX_XXTEA_DATA32 20
 #define MAX_XXTEA_KEY32  4
 #define MAX_XXTEA_KEY8   (MAX_XXTEA_KEY32 * 4)
@@ -56,5 +58,19 @@ int xxtea_setup(uint8_t *key, int32_t len);
 
 int xxtea_encrypt(uint8_t *data, int32_t len, uint8_t *buf, int32_t *maxlen);
 int xxtea_decrypt(uint8_t *data, int32_t len);
+
+class xxtea_c
+{
+  private:
+  bool keyset;
+  uint8_t data[MAX_XXTEA_DATA8];
+  public:
+  xxtea_c(){this->keyset = false;}  
+  bool setKey(String key);
+  String encrypt(String data);
+  String decrypt(String data);
+};
+
+extern xxtea_c xxtea;
 
 #endif /* _XXTEA_IOT_CRYPT_H_ */

@@ -114,3 +114,103 @@ int xxtea_decrypt(uint8_t *data, int32_t len)
   return ret;
 }
 
+bool xxtea_c::setKey(String key)
+{
+  // Initially reset the Status of the Key
+  keyset = false;
+  if(key.length() <= MAX_XXTEA_KEY8)
+  {
+    // Setup the Key
+    xxtea_setup((uint8_t *)key.c_str(), key.length());
+    // Say that the Key has been Initialized
+    keyset = true;
+    return true;
+  }
+  return false;
+}
+
+static char tohex(uint8_t b)
+{
+  if(b>9)
+    return (char)(b + 'A' - 10);
+  return (char)(b + '0');
+}
+
+String xxtea_c::encrypt(String data)
+{
+  // Works only if the Key in setup
+  if(this->keyset && data.length() != 0)
+  {
+    // If the Data withn the limits of the Engine
+    if(data.length() < MAX_XXTEA_DATA8)
+    {
+      int32_t len;
+      // Assign the Maximum buffer we have
+      len = MAX_XXTEA_DATA8;
+      // Perform Encryption
+      if(xxtea_encrypt((uint8_t *)data.c_str(),data.length(),
+        this->data,&len) == XXTEA_STATUS_SUCCESS)
+      {
+        String result;
+        int i;
+        result.reserve(len*2 + 1);
+        result = "";
+        for(i=0;i<len;i++)
+        {
+          result+=tohex((this->data[i] >> 4) & 0x0F);
+          result+=tohex(this->data[i] & 0x0F);
+        }
+        return result;
+      }
+    }
+  }
+  return String(F("-FAIL-"));
+}
+
+static uint8_t c2h(char *data)
+{
+  uint8_t b = 0;
+  if(data[0] >= 'A')
+    b |= data[0] - 'A' + 10;
+  else
+    b |= data[0] - '0';
+  b <<= 4;
+  if(data[1] >= 'A')
+    b |= data[1] - 'A' + 10;
+  else
+    b |= data[1] - '0';
+  return b;
+}
+
+String xxtea_c::decrypt(String data)
+{
+  // Works only if the Key in setup
+  if(this->keyset && data.length() != 0 && (data.length() % 4) == 0)
+  {
+    // If the Data withn the limits of the Engine
+    if(data.length() < (MAX_XXTEA_DATA8 * 2))
+    {
+      uint32_t len,i,k;
+      memset(this->data, 0, MAX_XXTEA_DATA8);
+      len = data.length()/2;
+      data.toUpperCase(); // Converting all Hex to Upper case for easy conversion
+      // Fill up the Data Buffer
+      for(i=0,k = 0;i<len;i++,k+=2)
+      {
+        this->data[i] = c2h((char *)data.substring(k,k+2).c_str());
+      }
+      // Perform Decryption
+      if(xxtea_decrypt(this->data, len) == XXTEA_STATUS_SUCCESS)
+      {
+        String result;
+        result = (char *)this->data;
+        return result;
+      }
+    }
+  }
+  return String("-FAIL-");
+}
+
+
+xxtea_c xxtea;
+
